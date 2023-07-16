@@ -22,7 +22,7 @@ const App: React.FC = () => {
     <>
       <Nav />
 
-      <Box overflowX="auto" height="calc(100vh - 60px)">
+      <Box overflowX="auto" height="calc(100vh - 61px)">
         <Switch>
           <Route path="/jobs" component={Jobs} />
           <Route path="/streams" component={Streams} />

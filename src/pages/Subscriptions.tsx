@@ -31,7 +31,7 @@ const Subscriptions: React.FC = () => {
   return (
     <TableContainer overflowX="unset" overflowY="unset">
       <Table variant="striped" colorScheme="blackAlpha">
-        <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
+        <Thead position="sticky" top="0" zIndex={1000} bgColor="white">
           <Tr>
             <Th isNumeric>ID</Th>
             <Th>Channel ID</Th>
