@@ -1,6 +1,6 @@
 import { Box } from "@chakra-ui/react";
 import { useAtomValue } from "jotai";
-import React, { lazy } from "react";
+import React, { lazy, Suspense } from "react";
 import { Redirect, Route, Switch } from "wouter";
 
 import { credentialValidAtom } from "./atoms";
@@ -25,13 +25,15 @@ const App: React.FC = () => {
 
       <Box mt="60px">
         <Switch>
-          <Route path="/jobs" component={Jobs} />
-          <Route path="/streams" component={Streams} />
-          <Route path="/notifications" component={Notifications} />
-          <Route path="/vtubers" component={Vtubers} />
-          <Route path="/subscriptions" component={Subscriptions} />
-          <Route path="/channels" component={Channels} />
-          <Route path="/" children={<Redirect to="/jobs" />} />
+          <Suspense fallback={<div>loading...</div>}>
+            <Route path="/jobs" component={Jobs} />
+            <Route path="/streams" component={Streams} />
+            <Route path="/notifications" component={Notifications} />
+            <Route path="/vtubers" component={Vtubers} />
+            <Route path="/subscriptions" component={Subscriptions} />
+            <Route path="/channels" component={Channels} />
+            <Route path="/" children={<Redirect to="/jobs" />} />
+          </Suspense>
         </Switch>
       </Box>
     </>
