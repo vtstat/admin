@@ -3,7 +3,7 @@ import { useAtomValue } from "jotai";
 import React from "react";
 import { Redirect, Route, Switch } from "wouter";
 
-import { credentialAtom } from "./atoms";
+import { credentialValidAtom } from "./atoms";
 import Nav from "./components/Nav";
 import Channels from "./pages/Channels";
 import Jobs from "./pages/Jobs";
@@ -14,15 +14,15 @@ import Subscriptions from "./pages/Subscriptions";
 import Vtubers from "./pages/VTubers";
 
 const App: React.FC = () => {
-  const credential = useAtomValue(credentialAtom);
+  const credentialValid = useAtomValue(credentialValidAtom);
 
-  if (!credential) return <SignIn />;
+  if (!credentialValid) return <SignIn />;
 
   return (
     <>
       <Nav />
 
-      <Box overflowX="auto" height="calc(100vh - 61px)">
+      <Box mt="60px">
         <Switch>
           <Route path="/jobs" component={Jobs} />
           <Route path="/streams" component={Streams} />

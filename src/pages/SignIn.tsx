@@ -3,9 +3,7 @@ import React, { useEffect } from "react";
 
 import { credentialAtom } from "../atoms";
 
-type Props = {};
-
-const SignIn: React.FC<Props> = ({}) => {
+const SignIn: React.FC = () => {
   const setCredential = useSetAtom(credentialAtom);
 
   useEffect(() => {
