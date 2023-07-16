@@ -107,7 +107,9 @@ const Jobs: React.FC = ({}) => {
                     <JobKind kind={job.kind} />
                   </Td>
                   <Td>
-                    <JobsPayload payload={job.payload} />
+                    {job.payload && typeof job.payload === "object" && (
+                      <JobsPayload payload={job.payload} />
+                    )}
                   </Td>
                   <Td>
                     <FormatDate>{job.created_at}</FormatDate>
