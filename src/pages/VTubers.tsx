@@ -18,6 +18,7 @@ import {
   Th,
   Thead,
   Tr,
+  useToast,
 } from "@chakra-ui/react";
 import { atom, useAtom, useSetAtom } from "jotai";
 import React from "react";
@@ -25,6 +26,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQuery } from "react-query";
 
 import FormInput from "../components/FormInput";
+import { client } from "../main";
 import { fetch, put } from "../utils/fetch";
 
 const modalOpenAtom = atom(false);
@@ -82,7 +84,7 @@ const VTubers: React.FC = ({}) => {
         </Tbody>
       </Table>
 
-      <Box position="fixed" right={8} bottom={8} zIndex={2434}>
+      <Box position="fixed" right={8} bottom={8} zIndex={1000}>
         <IconButton
           aria-label="add vtuber"
           colorScheme="teal"
@@ -122,6 +124,8 @@ const AddVTuberModal: React.FC = () => {
     put("/vtuber", body)
   );
 
+  const toast = useToast();
+
   const {
     control,
     handleSubmit,
@@ -132,6 +136,13 @@ const AddVTuberModal: React.FC = () => {
   const onSubmit = async (values: FormValues) => {
     await mutateAsync(values);
     setOpen(false);
+    toast({
+      title: "VTuber created.",
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+    });
+    client.refetchQueries(["vtubers"]);
   };
 
   return (
@@ -166,7 +177,7 @@ const AddVTuberModal: React.FC = () => {
                 name="native_name"
                 label="Native name"
                 required
-                rules={{ required: true, minLength: 3 }}
+                rules={{ required: true, minLength: 2 }}
                 inputProps={{
                   placeholder: "e.g. 白上フブキ, Mori Calliope",
                   spellCheck: false,
@@ -177,7 +188,7 @@ const AddVTuberModal: React.FC = () => {
                 control={control}
                 name="english_name"
                 label="English name"
-                rules={{ minLength: 3 }}
+                rules={{ minLength: 2 }}
                 inputProps={{
                   placeholder: "e.g. Shirakami Fubuki, Mori Calliope",
                   spellCheck: false,
@@ -199,7 +210,7 @@ const AddVTuberModal: React.FC = () => {
                 control={control}
                 name="twitter_username"
                 label="Twitter username"
-                rules={{ minLength: 3, pattern: /^[A-Za-z0-9_]$/ }}
+                rules={{ minLength: 3, pattern: /^[A-Za-z0-9_]*$/ }}
                 inputProps={{
                   placeholder: "e.g. shirakamifubuki",
                   spellCheck: false,
@@ -211,7 +222,7 @@ const AddVTuberModal: React.FC = () => {
                 name="youtube_channel_id"
                 label="YouTube Channel ID"
                 required
-                rules={{ required: true, pattern: /^[A-Za-z-_0-9]{24}$/ }}
+                rules={{ required: true, pattern: /^[A-Za-z0-9-_]{24}$/ }}
                 inputProps={{
                   placeholder: "e.g. UCoSrY_IQQVpmIRZ9Xf-y93g",
                   spellCheck: false,
@@ -225,7 +236,12 @@ const AddVTuberModal: React.FC = () => {
               Close
             </Button>
 
-            <Button colorScheme="teal" isLoading={isSubmitting} type="submit">
+            <Button
+              colorScheme="teal"
+              isLoading={isSubmitting}
+              loadingText="Submitting"
+              type="submit"
+            >
               Submit
             </Button>
           </ModalFooter>
