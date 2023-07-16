@@ -1,17 +1,18 @@
 import { Box } from "@chakra-ui/react";
 import { useAtomValue } from "jotai";
-import React from "react";
+import React, { lazy } from "react";
 import { Redirect, Route, Switch } from "wouter";
 
 import { credentialValidAtom } from "./atoms";
 import Nav from "./components/Nav";
-import Channels from "./pages/Channels";
-import Jobs from "./pages/Jobs";
-import Notifications from "./pages/Notifications";
-import SignIn from "./pages/SignIn";
-import Streams from "./pages/Streams";
-import Subscriptions from "./pages/Subscriptions";
-import Vtubers from "./pages/VTubers";
+
+const Channels = lazy(() => import("./pages/Channels"));
+const Jobs = lazy(() => import("./pages/Jobs"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const SignIn = lazy(() => import("./pages/SignIn"));
+const Streams = lazy(() => import("./pages/Streams"));
+const Subscriptions = lazy(() => import("./pages/Subscriptions"));
+const Vtubers = lazy(() => import("./pages/VTubers"));
 
 const App: React.FC = () => {
   const credentialValid = useAtomValue(credentialValidAtom);
