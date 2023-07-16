@@ -6,7 +6,7 @@ import { Redirect, Route, Switch } from "wouter";
 import { credentialAtom } from "./atoms";
 import Nav from "./components/Nav";
 import Channels from "./pages/Channels";
-import Jobs from "./pages/jobs";
+import Jobs from "./pages/Jobs";
 import Notifications from "./pages/Notifications";
 import SignIn from "./pages/SignIn";
 import Streams from "./pages/Streams";

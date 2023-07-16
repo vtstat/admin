@@ -4,7 +4,6 @@ import {
   Link,
   Stack,
   Text,
-  useBreakpointValue,
   useColorModeValue,
 } from "@chakra-ui/react";
 import React from "react";
