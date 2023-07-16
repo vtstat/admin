@@ -1,4 +1,5 @@
 import {
+  Img,
   Link,
   Table,
   TableContainer,
@@ -13,9 +14,8 @@ import React, { Fragment } from "react";
 import { useInfiniteQuery } from "react-query";
 
 import FormatDate from "../components/FormatDate";
+import LoadMore from "../components/LoadMore";
 import { fetch } from "../utils/fetch";
-
-type Props = {};
 
 type Stream = {
   platformId: string;
@@ -31,7 +31,7 @@ type Stream = {
   status: "scheduled" | "live" | "ended";
 };
 
-const Streams: React.FC<Props> = ({}) => {
+const Streams: React.FC = () => {
   const {
     data: streams,
     fetchNextPage,
@@ -49,7 +49,7 @@ const Streams: React.FC<Props> = ({}) => {
   return (
     <TableContainer overflowX="unset" overflowY="unset">
       <Table variant="striped" colorScheme="blackAlpha">
-        <Thead position="sticky" top="0" zIndex={1000} bgColor="white">
+        <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
           <Tr>
             <Th isNumeric>StreamId</Th>
             <Th width="160px">Thumbnail</Th>
@@ -69,12 +69,15 @@ const Streams: React.FC<Props> = ({}) => {
                 <Tr key={stream.streamId}>
                   <Td isNumeric>{stream.streamId}</Td>
                   <Td width="160px">
-                    <img
-                      src={stream.thumbnailUrl}
-                      loading="lazy"
-                      width="160px"
-                      height="90px"
-                    />
+                    {stream.thumbnailUrl && (
+                      <Img
+                        loading="lazy"
+                        src={stream.thumbnailUrl}
+                        aspectRatio="16/9"
+                        minW="100px"
+                        borderRadius=".25rem"
+                      />
+                    )}
                   </Td>
                   <Td>
                     <StreamStatus stream={stream} />
@@ -105,17 +108,14 @@ const Streams: React.FC<Props> = ({}) => {
             </Fragment>
           ))}
         </Tbody>
-        <button
-          onClick={() => fetchNextPage()}
-          disabled={!hasNextPage || isFetchingNextPage}
-        >
-          {isFetchingNextPage
-            ? "Loading more..."
-            : hasNextPage
-            ? "Load More"
-            : "Nothing more to load"}
-        </button>
       </Table>
+
+      {hasNextPage && (
+        <LoadMore
+          onReach={() => fetchNextPage()}
+          disabled={isFetchingNextPage}
+        />
+      )}
     </TableContainer>
   );
 };

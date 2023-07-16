@@ -19,6 +19,7 @@ import {
   Thead,
   Tr,
   useToast,
+  Img,
 } from "@chakra-ui/react";
 import { atom, useAtom, useSetAtom } from "jotai";
 import React from "react";
@@ -33,10 +34,11 @@ const modalOpenAtom = atom(false);
 
 type VTuber = {
   vtuber_id: string;
+  thumbnail_url: string | null;
   native_name: string;
-  english_name: string;
-  japanese_name: string;
-  twitter_username: string;
+  english_name: string | null;
+  japanese_name: string | null;
+  twitter_username: string | null;
   debuted_at: string | null;
   retired_at: string | null;
 };
@@ -51,9 +53,10 @@ const VTubers: React.FC = ({}) => {
   return (
     <TableContainer overflowX="unset" overflowY="unset">
       <Table variant="striped" colorScheme="blackAlpha">
-        <Thead position="sticky" top="0" zIndex={1000} bgColor="white">
+        <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
           <Tr>
             <Th isNumeric>ID</Th>
+            <Th>Thumbnail</Th>
             <Th>Native Name</Th>
             <Th>English Name</Th>
             <Th>Japanese Name</Th>
@@ -66,6 +69,17 @@ const VTubers: React.FC = ({}) => {
           {vtubers.map((vtuber) => (
             <Tr key={vtuber.vtuber_id}>
               <Td isNumeric>{vtuber.vtuber_id}</Td>
+              <Td>
+                {vtuber.thumbnail_url && (
+                  <Img
+                    loading="lazy"
+                    src={vtuber.thumbnail_url}
+                    w="40px"
+                    h="40px"
+                    borderRadius="9999px"
+                  />
+                )}
+              </Td>
               <Td>{vtuber.native_name}</Td>
               <Td>{vtuber.english_name}</Td>
               <Td>{vtuber.japanese_name}</Td>

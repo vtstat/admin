@@ -6,19 +6,20 @@ type Props = {
   onReach: () => void;
 };
 
-const LoadMore: React.FC<Props> = ({ disabled }) => {
-  const disableRef = useRef<boolean>();
-  disableRef.current = disabled;
-
+const LoadMore: React.FC<Props> = ({ disabled, onReach }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const obs = new IntersectionObserver(() => {});
+    if (disabled) return;
+
+    const obs = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) onReach();
+    });
 
     obs.observe(ref.current!);
 
-    return () => obs.unobserve(ref.current!);
-  }, []);
+    return () => obs.disconnect();
+  }, [disabled]);
 
   return <Progress ref={ref} size="xs" isIndeterminate />;
 };

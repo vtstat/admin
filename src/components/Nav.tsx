@@ -36,6 +36,11 @@ const Nav: React.FC<Props> = ({}) => {
       borderBottom={1}
       borderStyle={"solid"}
       borderColor={useColorModeValue("gray.200", "gray.900")}
+      alignItems="center"
+      position="fixed"
+      left={0}
+      right={0}
+      top={0}
     >
       <Text
         as="b"
@@ -48,7 +53,7 @@ const Nav: React.FC<Props> = ({}) => {
 
       <Box flex={1} />
 
-      <Stack direction="row" overflowX="auto">
+      <Stack direction="row" overflowX="auto" spacing={0}>
         {MENUS.map((menu) => (
           <Link
             key={menu}

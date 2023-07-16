@@ -1,6 +1,13 @@
 import {
   Button,
-  Progress,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverFooter,
+  PopoverHeader,
+  PopoverTrigger,
   Stack,
   Table,
   TableContainer,
@@ -13,10 +20,12 @@ import {
 } from "@chakra-ui/react";
 import { getUnixTime, parseISO } from "date-fns";
 import React, { Fragment } from "react";
-import { useInfiniteQuery } from "react-query";
+import { useInfiniteQuery, useMutation } from "react-query";
 
 import FormatDate from "../components/FormatDate";
-import { fetch } from "../utils/fetch";
+import LoadMore from "../components/LoadMore";
+import { client } from "../main";
+import { fetch, post } from "../utils/fetch";
 
 type Job = {
   job_id: number;
@@ -58,7 +67,7 @@ const Jobs: React.FC = ({}) => {
   return (
     <TableContainer overflowX="unset" overflowY="unset">
       <Table variant="striped" colorScheme="blackAlpha">
-        <Thead position="sticky" top="0" zIndex={1000} bgColor="white">
+        <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
           <Tr>
             <Th isNumeric>ID</Th>
             <Th>Status</Th>
@@ -81,12 +90,22 @@ const Jobs: React.FC = ({}) => {
                     <JobsStatus job={job} />
                   </Td>
                   <Td>
-                    <FormatDate>{job.last_run}</FormatDate>
+                    {job.last_run ? (
+                      <FormatDate>{job.last_run}</FormatDate>
+                    ) : (
+                      "N/A"
+                    )}
                   </Td>
                   <Td>
-                    <FormatDate>{job.next_run}</FormatDate>
+                    {job.next_run ? (
+                      <FormatDate>{job.next_run}</FormatDate>
+                    ) : (
+                      "N/A"
+                    )}
                   </Td>
-                  <Td>{job.kind}</Td>
+                  <Td>
+                    <JobKind kind={job.kind} />
+                  </Td>
                   <Td>
                     <JobsPayload payload={job.payload} />
                   </Td>
@@ -97,29 +116,21 @@ const Jobs: React.FC = ({}) => {
                     <FormatDate>{job.updated_at}</FormatDate>
                   </Td>
                   <Td>
-                    <Button colorScheme="teal" variant="link">
-                      Re-run
-                    </Button>
+                    <ReRuneButton job={job} />
                   </Td>
                 </Tr>
               ))}
             </Fragment>
           ))}
         </Tbody>
-
-        <button
-          onClick={() => fetchNextPage()}
-          disabled={!hasNextPage || isFetchingNextPage}
-        >
-          {isFetchingNextPage
-            ? "Loading more..."
-            : hasNextPage
-            ? "Load More"
-            : "Nothing more to load"}
-        </button>
       </Table>
 
-      <Progress size="xs" isIndeterminate />
+      {hasNextPage && (
+        <LoadMore
+          onReach={() => fetchNextPage()}
+          disabled={isFetchingNextPage}
+        />
+      )}
     </TableContainer>
   );
 };
@@ -153,6 +164,60 @@ const JobsStatus: React.FC<{ job: Job }> = ({ job }) => {
     default:
       return null;
   }
+};
+
+const JobKind: React.FC<{ kind: string }> = ({ kind }) => {
+  switch (kind) {
+    case "SendNotification": {
+      return <Tag colorScheme="telegram">Send Notification</Tag>;
+    }
+
+    case "UpsertYoutubeStream": {
+      return <Tag colorScheme="orange">Upsert YouTube Stream</Tag>;
+    }
+
+    default: {
+      return <Tag>{kind}</Tag>;
+    }
+  }
+};
+
+const ReRuneButton: React.FC<{ job: Job }> = ({ job }) => {
+  const { mutate, isLoading } = useMutation(
+    () => post(`/jobs/${job.job_id}/re_run`, null),
+    {
+      onSuccess: () => {
+        client.refetchQueries(["jobs"]);
+      },
+    }
+  );
+
+  return (
+    <Popover isLazy>
+      <PopoverTrigger>
+        <Button colorScheme="teal" variant="link">
+          Re-run
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent>
+        <PopoverHeader fontWeight="semibold">Confirmation</PopoverHeader>
+        <PopoverArrow />
+        <PopoverCloseButton />
+        <PopoverBody>Are you sure you want to re-run this job?</PopoverBody>
+        <PopoverFooter display="flex" justifyContent="flex-end">
+          <Button
+            size="sm"
+            colorScheme="green"
+            loadingText="Applying"
+            isLoading={isLoading}
+            onClick={() => mutate()}
+          >
+            Apply
+          </Button>
+        </PopoverFooter>
+      </PopoverContent>
+    </Popover>
+  );
 };
 
 export default Jobs;
