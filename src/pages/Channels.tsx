@@ -7,6 +7,7 @@ import {
   Th,
   Thead,
   Tr,
+  Link,
 } from "@chakra-ui/react";
 import React from "react";
 import { useQuery } from "react-query";
@@ -31,7 +32,7 @@ const Channels: React.FC = () => {
         <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
           <Tr>
             <Th isNumeric>ID</Th>
-            <Th>VTuber Id</Th>
+            <Th isNumeric>VTuber Id</Th>
             <Th>Platform</Th>
             <Th>Platform Id</Th>
           </Tr>
@@ -44,7 +45,14 @@ const Channels: React.FC = () => {
               <Td>
                 <PlatformTag>{job.platform}</PlatformTag>
               </Td>
-              <Td>{job.platform_id}</Td>
+              <Td>
+                <Link
+                  target="_blank"
+                  href={"https://www.youtube.com/channel/" + job.platform_id}
+                >
+                  {job.platform_id}
+                </Link>
+              </Td>
             </Tr>
           ))}
         </Tbody>
