@@ -1,6 +1,7 @@
 import {
   Table,
   TableContainer,
+  Tag,
   Tbody,
   Td,
   Th,
@@ -17,6 +18,7 @@ type Subscription = {
   subscription_id: number;
   payload: {
     vtuber_id: string;
+    guild_id: string;
     channel_id: string;
   };
   updated_at: string | null;
@@ -34,8 +36,10 @@ const Subscriptions: React.FC = () => {
         <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
           <Tr>
             <Th isNumeric>ID</Th>
-            <Th>Channel ID</Th>
-            <Th>VTuber Id</Th>
+            <Th isNumeric>Kind</Th>
+            <Th isNumeric>Guild ID</Th>
+            <Th isNumeric>Channel ID</Th>
+            <Th isNumeric>VTuber Id</Th>
             <Th>Created</Th>
             <Th>Updated</Th>
           </Tr>
@@ -44,8 +48,12 @@ const Subscriptions: React.FC = () => {
           {subscriptions.map((subscription) => (
             <Tr key={subscription.subscription_id}>
               <Td isNumeric>{subscription.subscription_id}</Td>
-              <Td>{subscription.payload.channel_id}</Td>
-              <Td>{subscription.payload.vtuber_id}</Td>
+              <Td isNumeric>
+                <Tag colorScheme="telegram">Discord</Tag>
+              </Td>
+              <Td isNumeric>{subscription.payload.guild_id}</Td>
+              <Td isNumeric>{subscription.payload.channel_id}</Td>
+              <Td isNumeric>{subscription.payload.vtuber_id}</Td>
               <Td>
                 <FormatDate>{subscription.created_at}</FormatDate>
               </Td>
