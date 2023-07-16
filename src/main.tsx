@@ -2,10 +2,11 @@ import { ChakraProvider } from "@chakra-ui/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 
 import App from "./App";
 
-const client = new QueryClient({
+export const client = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
@@ -19,6 +20,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ChakraProvider>
       <QueryClientProvider client={client}>
         <App />
+        {import.meta.env.DEV && <ReactQueryDevtools />}
       </QueryClientProvider>
     </ChakraProvider>
   </React.StrictMode>
