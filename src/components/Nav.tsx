@@ -41,6 +41,7 @@ const Nav: React.FC<Props> = ({}) => {
       left={0}
       right={0}
       top={0}
+      zIndex={2434}
     >
       <Text
         as="b"
