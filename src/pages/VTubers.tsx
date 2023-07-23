@@ -39,8 +39,8 @@ type VTuber = {
   english_name: string | null;
   japanese_name: string | null;
   twitter_username: string | null;
-  debuted_at: string | null;
-  retired_at: string | null;
+  debuted_at: number | null;
+  retired_at: number | null;
 };
 
 const VTubers: React.FC = ({}) => {

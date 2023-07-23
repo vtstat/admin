@@ -1,8 +1,13 @@
 import {
   Img,
   Link,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
   Table,
   TableContainer,
+  Tabs,
   Tag,
   Tbody,
   Td,
@@ -31,16 +36,43 @@ type Stream = {
   status: "scheduled" | "live" | "ended";
 };
 
-const Streams: React.FC = () => {
+const Streams: React.FC = () => (
+  <Tabs isLazy defaultIndex={2} variant="soft-rounded">
+    <TabList p={2}>
+      <Tab>Scheduled</Tab>
+      <Tab>Live</Tab>
+      <Tab>Ended</Tab>
+    </TabList>
+
+    <TabPanels>
+      <TabPanel p={0}>
+        <StreamsTable status="scheduled" />
+      </TabPanel>
+      <TabPanel p={0}>
+        <StreamsTable status="live" />
+      </TabPanel>
+      <TabPanel p={0}>
+        <StreamsTable status="ended" />
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
+);
+
+const StreamsTable: React.FC<{
+  status: "scheduled" | "live" | "ended";
+}> = ({ status }) => {
   const {
     data: streams,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(
-    ["streams"],
+    ["streams", status],
     ({ pageParam }) =>
-      fetch<Stream[]>({ url: "/streams", query: { end_at: pageParam } }),
+      fetch<Stream[]>({
+        url: "/streams",
+        query: { end_at: pageParam, status },
+      }),
     {
       getNextPageParam: (lastStreams) => lastStreams[23]?.updatedAt,
     }
@@ -54,7 +86,9 @@ const Streams: React.FC = () => {
             <Th isNumeric>StreamId</Th>
             <Th width="160px">Thumbnail</Th>
             <Th>Status</Th>
-            <Th isTruncated>Title</Th>
+            <Th isTruncated maxW="400px">
+              Title
+            </Th>
             <Th isNumeric>Vtuber</Th>
             <Th>Schedule Time</Th>
             <Th>Start Time</Th>
@@ -82,10 +116,11 @@ const Streams: React.FC = () => {
                   <Td>
                     <StreamStatus stream={stream} />
                   </Td>
-                  <Td isTruncated>
+                  <Td isTruncated maxW="400px">
                     <Link
                       target="_blank"
                       href={"https://youtu.be/" + stream.platformId}
+                      title={stream.title}
                     >
                       {stream.title}
                     </Link>

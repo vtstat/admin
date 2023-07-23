@@ -9,8 +9,13 @@ import {
   PopoverHeader,
   PopoverTrigger,
   Stack,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
   Table,
   TableContainer,
+  Tabs,
   Tag,
   Tbody,
   Td,
@@ -18,7 +23,6 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { getUnixTime, parseISO } from "date-fns";
 import React, { Fragment } from "react";
 import { useInfiniteQuery, useMutation } from "react-query";
 
@@ -31,36 +35,61 @@ type Job = {
   job_id: number;
   continuation: null;
   status: "Success" | string;
-  created_at: string;
-  last_run: string | null;
-  next_run: string | null;
+  created_at: number;
+  last_run: number | null;
+  next_run: number | null;
   kind: string;
   payload: {
     vtuber_id: string;
     channel_id: number;
     platform_stream_id: string;
   };
-  updated_at: string;
+  updated_at: number;
 };
 
-const Jobs: React.FC = ({}) => {
+const Jobs: React.FC = () => (
+  <Tabs isLazy defaultIndex={2} variant="soft-rounded">
+    <TabList p={2}>
+      <Tab>Queued</Tab>
+      <Tab>Running</Tab>
+      <Tab>Success</Tab>
+      <Tab>Failed</Tab>
+    </TabList>
+
+    <TabPanels>
+      <TabPanel p={0}>
+        <JobsTable status="queued" />
+      </TabPanel>
+      <TabPanel p={0}>
+        <JobsTable status="running" />
+      </TabPanel>
+      <TabPanel p={0}>
+        <JobsTable status="success" />
+      </TabPanel>
+      <TabPanel p={0}>
+        <JobsTable status="failed" />
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
+);
+
+const JobsTable: React.FC<{
+  status: "queued" | "running" | "success" | "failed";
+}> = ({ status }) => {
   const {
     data: jobs,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery(
-    ["jobs"],
+    ["jobs", status],
     ({ pageParam }) =>
       fetch<Job[]>({
         url: "/jobs",
-        query: { end_at: pageParam },
+        query: { end_at: pageParam, status },
       }),
     {
-      getNextPageParam: (lastJobs) => {
-        const last = lastJobs[23]?.updated_at;
-        if (last) return getUnixTime(parseISO(last));
-      },
+      getNextPageParam: (lastJobs) => lastJobs[23]?.updated_at,
     }
   );
 

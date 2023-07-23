@@ -21,8 +21,8 @@ type Subscription = {
     guild_id: string;
     channel_id: string;
   };
-  updated_at: string | null;
-  created_at: string | null;
+  updated_at: number | null;
+  created_at: number | null;
 };
 
 const Subscriptions: React.FC = () => {
