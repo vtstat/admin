@@ -28,7 +28,7 @@ import { useMutation, useQuery } from "react-query";
 
 import FormInput from "../components/FormInput";
 import { client } from "../main";
-import { fetch, put } from "../utils/fetch";
+import { useFetch } from "../utils/fetch";
 
 const modalOpenAtom = atom(false);
 
@@ -44,8 +44,9 @@ type VTuber = {
 };
 
 const VTubers: React.FC = ({}) => {
+  const { get } = useFetch();
   const { data: vtubers = [] } = useQuery(["vtubers"], () =>
-    fetch<VTuber[]>("/vtubers")
+    get<VTuber[]>("/vtubers")
   );
 
   const setOpen = useSetAtom(modalOpenAtom);
@@ -134,6 +135,7 @@ const AddVTuberModal: React.FC = () => {
 
   const [open, setOpen] = useAtom(modalOpenAtom);
 
+  const { put } = useFetch();
   const { mutateAsync } = useMutation((body: FormValues) =>
     put("/vtuber", body)
   );

@@ -12,7 +12,7 @@ import React from "react";
 import { useQuery } from "react-query";
 import FormatDate from "../components/FormatDate";
 
-import { fetch } from "../utils/fetch";
+import { useFetch } from "../utils/fetch";
 
 type Subscription = {
   subscription_id: number;
@@ -26,8 +26,9 @@ type Subscription = {
 };
 
 const Subscriptions: React.FC = () => {
+  const { get } = useFetch();
   const { data: subscriptions = [] } = useQuery(["subscriptions"], () =>
-    fetch<Subscription[]>("/subscriptions")
+    get<Subscription[]>("/subscriptions")
   );
 
   return (

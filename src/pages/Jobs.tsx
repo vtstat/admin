@@ -29,7 +29,7 @@ import { useInfiniteQuery, useMutation } from "react-query";
 import FormatDate from "../components/FormatDate";
 import LoadMore from "../components/LoadMore";
 import { client } from "../main";
-import { fetch, post } from "../utils/fetch";
+import { useFetch } from "../utils/fetch";
 
 type Job = {
   job_id: number;
@@ -76,6 +76,7 @@ const Jobs: React.FC = () => (
 const JobsTable: React.FC<{
   status: "queued" | "running" | "success" | "failed";
 }> = ({ status }) => {
+  const { get } = useFetch();
   const {
     data: jobs,
     fetchNextPage,
@@ -84,7 +85,7 @@ const JobsTable: React.FC<{
   } = useInfiniteQuery(
     ["jobs", status],
     ({ pageParam }) =>
-      fetch<Job[]>({
+      get<Job[]>({
         url: "/jobs",
         query: { end_at: pageParam, status },
       }),
@@ -214,6 +215,8 @@ const JobKind: React.FC<{ kind: string }> = ({ kind }) => {
 };
 
 const ReRuneButton: React.FC<{ job: Job }> = ({ job }) => {
+  const { post } = useFetch();
+
   const { mutate, isLoading } = useMutation(
     () => post(`/jobs/${job.job_id}/re_run`, null),
     {

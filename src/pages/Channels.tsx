@@ -12,7 +12,7 @@ import {
 import React from "react";
 import { useQuery } from "react-query";
 
-import { fetch } from "../utils/fetch";
+import { useFetch } from "../utils/fetch";
 
 type Channel = {
   channel_id: number;
@@ -22,8 +22,9 @@ type Channel = {
 };
 
 const Channels: React.FC = () => {
+  const { get } = useFetch();
   const { data: channels = [] } = useQuery(["channels"], () =>
-    fetch<Channel[]>("/channels")
+    get<Channel[]>("/channels")
   );
 
   return (

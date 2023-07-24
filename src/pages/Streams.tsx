@@ -20,7 +20,7 @@ import { useInfiniteQuery } from "react-query";
 
 import FormatDate from "../components/FormatDate";
 import LoadMore from "../components/LoadMore";
-import { fetch } from "../utils/fetch";
+import { useFetch } from "../utils/fetch";
 
 type Stream = {
   platformId: string;
@@ -61,6 +61,7 @@ const Streams: React.FC = () => (
 const StreamsTable: React.FC<{
   status: "scheduled" | "live" | "ended";
 }> = ({ status }) => {
+  const { get } = useFetch();
   const {
     data: streams,
     fetchNextPage,
@@ -69,7 +70,7 @@ const StreamsTable: React.FC<{
   } = useInfiniteQuery(
     ["streams", status],
     ({ pageParam }) =>
-      fetch<Stream[]>({
+      get<Stream[]>({
         url: "/streams",
         query: { end_at: pageParam, status },
       }),

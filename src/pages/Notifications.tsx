@@ -11,7 +11,7 @@ import React, { Fragment } from "react";
 import { useInfiniteQuery } from "react-query";
 
 import FormatDate from "../components/FormatDate";
-import { fetch } from "../utils/fetch";
+import { useFetch } from "../utils/fetch";
 import LoadMore from "../components/LoadMore";
 
 type Notification = {
@@ -26,6 +26,7 @@ type Notification = {
 };
 
 const Notifications: React.FC = () => {
+  const { get } = useFetch();
   const {
     data: notifications,
     fetchNextPage,
@@ -34,7 +35,7 @@ const Notifications: React.FC = () => {
   } = useInfiniteQuery(
     ["notifications"],
     ({ pageParam }) =>
-      fetch<Notification[]>({
+      get<Notification[]>({
         url: "/notifications",
         query: { end_at: pageParam },
       }),

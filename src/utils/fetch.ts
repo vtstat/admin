@@ -1,50 +1,57 @@
-import { getDefaultStore } from "jotai";
+import { useToast } from "@chakra-ui/react";
+import { useAtomValue } from "jotai";
 import qs, { type UrlObject } from "query-string";
+import { useCallback } from "react";
 import { credentialAtom } from "../atoms";
-
-const st = getDefaultStore();
 
 // const baseUrl = "http://localhost:4444/api/admin";
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-export const fetch = async <T>(urlOrObject: string | UrlObject): Promise<T> => {
-  const res = await window.fetch(
-    typeof urlOrObject === "string"
-      ? baseUrl + urlOrObject
-      : qs.stringifyUrl({
-          ...urlOrObject,
-          url: baseUrl + urlOrObject.url,
-        }),
-    {
-      headers: { authorization: st.get(credentialAtom) },
-    }
+export const useFetch = () => {
+  const authorization = useAtomValue(credentialAtom);
+  const toast = useToast();
+
+  const mutation = useCallback(
+    async (method: "put" | "post", url: string, body: any) => {
+      const res = await window.fetch(baseUrl + url, {
+        method,
+        headers: { authorization, "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const json = await res.json();
+
+      if ("msg" in json && typeof json.msg === "string") {
+        toast({ title: json.msg, status: "success", isClosable: true });
+      }
+
+      return json;
+    },
+    [authorization, toast]
   );
 
-  return res.json();
-};
+  const query = useCallback(
+    async <T>(urlOrObject: string | UrlObject): Promise<T> => {
+      const res = await window.fetch(
+        typeof urlOrObject === "string"
+          ? baseUrl + urlOrObject
+          : qs.stringifyUrl({
+              url: baseUrl + urlOrObject.url,
+              query: urlOrObject.query,
+            }),
+        {
+          headers: { authorization },
+        }
+      );
 
-export const put = async (url: string, body: any): Promise<void> => {
-  const res = await window.fetch(baseUrl + url, {
-    method: "put",
-    headers: {
-      authorization: st.get(credentialAtom),
-      "content-type": "application/json",
+      return res.json();
     },
-    body: JSON.stringify(body),
-  });
+    [authorization, toast]
+  );
 
-  return res.json();
-};
-
-export const post = async (url: string, body: any): Promise<void> => {
-  const res = await window.fetch(baseUrl + url, {
-    method: "post",
-    headers: {
-      authorization: st.get(credentialAtom),
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  return res.json();
+  return {
+    get: query,
+    put: (url: string, body: any) => mutation("put", url, body),
+    post: (url: string, body: any) => mutation("post", url, body),
+  };
 };
