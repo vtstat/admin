@@ -11,14 +11,7 @@ import { Link as ReachLink, useLocation } from "wouter";
 
 type Props = {};
 
-const MENUS = [
-  "jobs",
-  "streams",
-  "notifications",
-  "vtubers",
-  "subscriptions",
-  "channels",
-];
+const MENUS = ["jobs", "streams", "subscriptions", "catalog"];
 
 const Nav: React.FC<Props> = ({}) => {
   const [location] = useLocation();
@@ -41,7 +34,7 @@ const Nav: React.FC<Props> = ({}) => {
       left={0}
       right={0}
       top={0}
-      zIndex={2434}
+      zIndex={30}
     >
       <Text
         as="b"
@@ -49,7 +42,7 @@ const Nav: React.FC<Props> = ({}) => {
         fontFamily={"heading"}
         color={useColorModeValue("gray.800", "white")}
       >
-        vtstat
+        vtstats
       </Text>
 
       <Box flex={1} />

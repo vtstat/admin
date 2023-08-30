@@ -15,9 +15,9 @@ import { useQuery } from "react-query";
 import { useFetch } from "../utils/fetch";
 
 type Channel = {
-  channel_id: number;
-  platform_id: string;
-  vtuber_id: string;
+  channelId: number;
+  platformId: string;
+  vtuberId: string;
   platform: string;
 };
 
@@ -32,26 +32,26 @@ const Channels: React.FC = () => {
       <Table variant="striped" colorScheme="blackAlpha">
         <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
           <Tr>
-            <Th isNumeric>ID</Th>
-            <Th isNumeric>VTuber Id</Th>
+            <Th>ID</Th>
+            <Th>VTuber Id</Th>
             <Th>Platform</Th>
             <Th>Platform Id</Th>
           </Tr>
         </Thead>
         <Tbody>
           {channels.map((job) => (
-            <Tr key={job.channel_id}>
-              <Td isNumeric>{job.channel_id}</Td>
-              <Td isNumeric>{job.vtuber_id}</Td>
+            <Tr key={job.channelId}>
+              <Td>{job.channelId}</Td>
+              <Td>{job.vtuberId}</Td>
               <Td>
                 <PlatformTag>{job.platform}</PlatformTag>
               </Td>
               <Td>
                 <Link
                   target="_blank"
-                  href={"https://www.youtube.com/channel/" + job.platform_id}
+                  href={"https://www.youtube.com/channel/" + job.platformId}
                 >
-                  {job.platform_id}
+                  {job.platformId}
                 </Link>
               </Td>
             </Tr>

@@ -68,7 +68,7 @@ const VTubers: React.FC = ({}) => {
       <Table variant="striped" colorScheme="blackAlpha">
         <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
           <Tr>
-            <Th>Thumbnail</Th>
+            <Th>Profile</Th>
             <Th>ID</Th>
             <Th>Native Name</Th>
             <Th>English Name</Th>
