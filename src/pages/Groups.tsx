@@ -1,4 +1,6 @@
 import {
+  Alert,
+  AlertIcon,
   Avatar,
   AvatarGroup,
   Box,
@@ -66,11 +68,13 @@ const AvatarList: React.FC<{ items: string[] }> = ({ items }) => {
   const { data: groups = [] } = useQuery({
     queryKey: ["groups"],
     queryFn: () => get<Group[]>("/groups"),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: vtubers = [] } = useQuery({
     queryKey: ["vtubers"],
     queryFn: () => get<VTuber[]>("/vtubers"),
+    staleTime: 5 * 60 * 1000,
   });
 
   items.sort((a, b) => b.localeCompare(a));
@@ -85,10 +89,10 @@ const AvatarList: React.FC<{ items: string[] }> = ({ items }) => {
       const group = groups.find((g) => g.groupId === id);
 
       if (group) {
-        names.push(<div>{group.nativeName}</div>);
+        names.push(group.nativeName);
       } else {
         notExisted = true;
-        names.push(<div>{id} (not existed)</div>);
+        names.push(`${id} (not existed)`);
       }
       avatars.push(<Avatar key={item} name={group?.nativeName || id} />);
     }
@@ -98,10 +102,10 @@ const AvatarList: React.FC<{ items: string[] }> = ({ items }) => {
       const vtuber = vtubers.find((g) => g.vtuberId === id);
 
       if (vtuber) {
-        names.push(<div>{vtuber.nativeName}</div>);
+        names.push(vtuber.nativeName);
       } else {
         notExisted = true;
-        names.push(<div>{id} (not existed)</div>);
+        names.push(`${id} (not existed)`);
       }
       avatars.push(
         <Avatar
@@ -114,11 +118,16 @@ const AvatarList: React.FC<{ items: string[] }> = ({ items }) => {
   }
 
   return (
-    <Tooltip label={<VStack>{names}</VStack>} placement="bottom-start">
-      <AvatarGroup size="md" max={6}>
-        {notExisted && "(!)"}
-        {avatars}
-      </AvatarGroup>
+    <Tooltip label={<div>{names.join(", ")}</div>} placement="bottom-start">
+      <Box
+        display="inline-flex"
+        backgroundColor={notExisted ? "red.500" : ""}
+        borderRadius="8px"
+      >
+        <AvatarGroup size="md" max={6}>
+          {avatars}
+        </AvatarGroup>
+      </Box>
     </Tooltip>
   );
 };
@@ -129,70 +138,79 @@ const Groups: React.FC<Props> = ({}) => {
   const { data: groups } = useQuery({
     queryKey: ["groups"],
     queryFn: () => get<Group[]>("/groups"),
+    select: (groups) =>
+      groups.sort((a, b) => a.groupId.localeCompare(b.groupId)),
+    staleTime: 5 * 60 * 1000,
   });
 
   const setEditModalState = useSetAtom(editModalState);
 
   return (
-    <TableContainer overflowX="unset" overflowY="unset">
-      <Table variant="striped" colorScheme="blackAlpha">
-        <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
-          <Tr>
-            <Th isNumeric>ID</Th>
-            <Th>Root</Th>
-            <Th>Native Name</Th>
-            <Th>English Name</Th>
-            <Th>Japanese Name</Th>
-            <Th>Children</Th>
-            <Th>Actions</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {groups?.map((group) => (
-            <Tr key={group.groupId}>
-              <Td isNumeric>{group.groupId}</Td>
-              <Td>
-                {group.root ? (
-                  <Tag colorScheme="red">True</Tag>
-                ) : (
-                  <Tag>False</Tag>
-                )}
-              </Td>
-              <Td>{group.nativeName}</Td>
-              <Td>{group.englishName}</Td>
-              <Td>{group.japaneseName}</Td>
-              <Td>
-                <AvatarList items={group.children} />
-              </Td>
-              <Td>
-                <Button
-                  colorScheme="teal"
-                  variant="link"
-                  onClick={() => {
-                    setEditModalState({ open: true, group });
-                  }}
-                >
-                  Edit
-                </Button>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
-
-      <Box position="fixed" right={8} bottom={8} zIndex={1000}>
-        <IconButton
-          aria-label="add group"
-          colorScheme="teal"
-          isRound
-          size="lg"
-          onClick={() => setEditModalState({ open: true })}
-          icon={<Add />}
-        />
+    <div>
+      <Box p="8px">
+        <NotInGroup />
       </Box>
 
-      <EditGroupModal />
-    </TableContainer>
+      <TableContainer overflowX="unset" overflowY="unset">
+        <Table variant="striped" colorScheme="blackAlpha">
+          <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
+            <Tr>
+              <Th>ID</Th>
+              <Th>Root</Th>
+              <Th>Native Name</Th>
+              <Th>English Name</Th>
+              <Th>Japanese Name</Th>
+              <Th>Children</Th>
+              <Th>Actions</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {groups?.map((group) => (
+              <Tr key={group.groupId}>
+                <Td>{group.groupId}</Td>
+                <Td>
+                  {group.root ? (
+                    <Tag colorScheme="red">True</Tag>
+                  ) : (
+                    <Tag>False</Tag>
+                  )}
+                </Td>
+                <Td>{group.nativeName}</Td>
+                <Td>{group.englishName}</Td>
+                <Td>{group.japaneseName}</Td>
+                <Td>
+                  <AvatarList items={group.children} />
+                </Td>
+                <Td>
+                  <Button
+                    colorScheme="teal"
+                    variant="link"
+                    onClick={() => {
+                      setEditModalState({ open: true, group });
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+
+        <Box position="fixed" right={8} bottom={8} zIndex={1000}>
+          <IconButton
+            aria-label="add group"
+            colorScheme="teal"
+            isRound
+            size="lg"
+            onClick={() => setEditModalState({ open: true })}
+            icon={<Add />}
+          />
+        </Box>
+
+        <EditGroupModal />
+      </TableContainer>
+    </div>
   );
 };
 
@@ -205,6 +223,49 @@ const Add: React.FC = () => (
 const editModalState = atom<{ open: boolean; group?: Group }>({
   open: false,
 });
+
+const NotInGroup: React.FC = () => {
+  const { get } = useFetch();
+
+  const { data: groups = [] } = useQuery({
+    queryKey: ["groups"],
+    queryFn: () => get<Group[]>("/groups"),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: vtubers = [] } = useQuery({
+    queryKey: ["vtubers"],
+    queryFn: () => get<VTuber[]>("/vtubers"),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const vtuberNotInGroup = vtubers.filter(
+    (vtuber) =>
+      !groups.some((group) =>
+        group.children.includes(`vtuber:${vtuber.vtuberId}`)
+      )
+  );
+
+  const subgroupNotInGroup = groups.filter(
+    (group) =>
+      !group.root &&
+      !groups.some((g) => g.children.includes(`group:${group.groupId}`))
+  );
+
+  if (vtuberNotInGroup.length === 0 && subgroupNotInGroup.length === 0) {
+    return null;
+  }
+
+  return (
+    <Alert status="warning">
+      <AlertIcon />
+      Some vtuber(s), group(s) is not in any group:{" "}
+      {[...vtuberNotInGroup, ...subgroupNotInGroup]
+        .map((i) => i.nativeName)
+        .join(", ")}
+    </Alert>
+  );
+};
 
 const EditGroupModal: React.FC = () => {
   type FormValues = Group;
@@ -230,7 +291,7 @@ const EditGroupModal: React.FC = () => {
         vtubers.some((v) => `vtuber:${v.vtuberId}` !== id)
     );
 
-    if (values.groupId !== group?.groupId) {
+    if (group && values.groupId !== group.groupId) {
       await post("/groups", [
         values,
         { ...values, children: [], groupId: group?.groupId },
@@ -249,7 +310,7 @@ const EditGroupModal: React.FC = () => {
       isCentered
       isOpen={open}
       onClose={() => setModalState({ open: false })}
-      onCloseComplete={() => reset()}
+      onCloseComplete={() => reset({ children: [] })}
     >
       <ModalOverlay />
       <ModalContent>
@@ -368,7 +429,7 @@ const ChildrenSelectionList: React.FC<{
   value: string[];
   onChange: (value: string[]) => void;
   disabled: boolean;
-}> = ({ value, onChange, disabled }) => {
+}> = ({ value = [], onChange, disabled }) => {
   const { get } = useFetch();
 
   const parentRef = React.useRef<HTMLDivElement>(null);
@@ -376,11 +437,13 @@ const ChildrenSelectionList: React.FC<{
   const { data: groups = [] } = useQuery({
     queryKey: ["groups"],
     queryFn: () => get<Group[]>("/groups"),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: vtubers = [] } = useQuery({
     queryKey: ["vtubers"],
     queryFn: () => get<VTuber[]>("/vtubers"),
+    staleTime: 5 * 60 * 1000,
   });
 
   const [searchValue, setSearchValue] = useState("");
