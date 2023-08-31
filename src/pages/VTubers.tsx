@@ -288,7 +288,7 @@ const EditVTuberModal: React.FC = () => {
                 name="nativeName"
                 label="Native name"
                 required
-                rules={{ required: true, minLength: 2 }}
+                rules={{ required: true, minLength: 1 }}
                 inputProps={{
                   placeholder: "e.g. 白上フブキ, Mori Calliope",
                   spellCheck: false,
