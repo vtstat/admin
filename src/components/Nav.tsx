@@ -9,11 +9,9 @@ import {
 import React from "react";
 import { Link as ReachLink, useLocation } from "wouter";
 
-type Props = {};
-
 const MENUS = ["jobs", "streams", "subscriptions", "catalog"];
 
-const Nav: React.FC<Props> = ({}) => {
+const Nav: React.FC = () => {
   const [location] = useLocation();
 
   const linkColor = useColorModeValue("gray.600", "gray.200");

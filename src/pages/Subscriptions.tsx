@@ -1,6 +1,11 @@
 import {
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
   Table,
   TableContainer,
+  Tabs,
   Tag,
   Tbody,
   Td,
@@ -8,11 +13,45 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import React from "react";
-import { useQuery } from "react-query";
+import React, { Fragment } from "react";
+import { useInfiniteQuery, useQuery } from "react-query";
+import { useLocation } from "wouter";
+
 import FormatDate from "../components/FormatDate";
+import LoadMore from "../components/LoadMore";
 
 import { useFetch } from "../utils/fetch";
+
+const tabs = ["subscriptions", "notifications"];
+
+const Subscriptions: React.FC<{ tab?: string }> = ({
+  tab = "subscriptions",
+}) => {
+  const [_, setLocation] = useLocation();
+
+  return (
+    <Tabs
+      isLazy
+      index={tabs.indexOf(tab)}
+      onChange={(index) => setLocation(`/subscriptions/${tabs[index]}`)}
+      variant="soft-rounded"
+    >
+      <TabList p={2}>
+        <Tab>Subscriptions</Tab>
+        <Tab>Notifications</Tab>
+      </TabList>
+
+      <TabPanels>
+        <TabPanel p={0}>
+          <SubscriptionsList />
+        </TabPanel>
+        <TabPanel p={0}>
+          <NotificationsList />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  );
+};
 
 type Subscription = {
   subscription_id: number;
@@ -25,7 +64,7 @@ type Subscription = {
   created_at: number | null;
 };
 
-const Subscriptions: React.FC = () => {
+const SubscriptionsList: React.FC = () => {
   const { get } = useFetch();
   const { data: subscriptions = [] } = useQuery(["subscriptions"], () =>
     get<Subscription[]>("/subscriptions")
@@ -65,6 +104,85 @@ const Subscriptions: React.FC = () => {
           ))}
         </Tbody>
       </Table>
+    </TableContainer>
+  );
+};
+
+type Notification = {
+  notification_id: number;
+  payload: {
+    vtuber_id: string;
+    stream_id: number;
+    message_id: string;
+  };
+  created_at: number;
+  updated_at: number;
+};
+
+const NotificationsList: React.FC = () => {
+  const { get } = useFetch();
+  const {
+    data: notifications,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery(
+    ["notifications"],
+    ({ pageParam }) =>
+      get<Notification[]>({
+        url: "/notifications",
+        query: { end_at: pageParam },
+      }),
+    {
+      getNextPageParam: (lastStreams) => lastStreams[23]?.updated_at,
+    }
+  );
+
+  return (
+    <TableContainer overflowX="unset" overflowY="unset">
+      <Table variant="striped" colorScheme="blackAlpha">
+        <Thead position="sticky" top="60px" zIndex={1000} bgColor="white">
+          <Tr>
+            <Th isNumeric>ID</Th>
+
+            <Th>Vtuber ID</Th>
+            <Th isNumeric>Stream ID</Th>
+            <Th isNumeric>Message ID</Th>
+
+            <Th>Created</Th>
+            <Th>Updated</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {notifications?.pages.map((notifications, index) => (
+            <Fragment key={index}>
+              {notifications.map((notification) => (
+                <Tr key={notification.notification_id}>
+                  <Td isNumeric>{notification.notification_id}</Td>
+
+                  <Td>{notification.payload.vtuber_id}</Td>
+                  <Td isNumeric>{notification.payload.stream_id}</Td>
+                  <Td isNumeric>{notification.payload.message_id}</Td>
+
+                  <Td>
+                    <FormatDate>{notification.created_at}</FormatDate>
+                  </Td>
+                  <Td>
+                    <FormatDate>{notification.updated_at}</FormatDate>
+                  </Td>
+                </Tr>
+              ))}
+            </Fragment>
+          ))}
+        </Tbody>
+      </Table>
+
+      {hasNextPage && (
+        <LoadMore
+          onReach={() => fetchNextPage()}
+          disabled={isFetchingNextPage}
+        />
+      )}
     </TableContainer>
   );
 };

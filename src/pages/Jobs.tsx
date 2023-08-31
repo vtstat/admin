@@ -25,16 +25,54 @@ import {
 } from "@chakra-ui/react";
 import React, { Fragment } from "react";
 import { useInfiniteQuery, useMutation } from "react-query";
+import { useLocation } from "wouter";
 
 import FormatDate from "../components/FormatDate";
 import LoadMore from "../components/LoadMore";
 import { client } from "../main";
 import { useFetch } from "../utils/fetch";
 
+const tabs = ["queued", "running", "success", "failed"];
+
+const Jobs: React.FC<{ tab?: string }> = ({ tab = "success" }) => {
+  const [_, setLocation] = useLocation();
+
+  return (
+    <Tabs
+      isLazy
+      index={tabs.indexOf(tab)}
+      onChange={(index) => setLocation(`/jobs/${tabs[index]}`)}
+      variant="soft-rounded"
+    >
+      <TabList p={2}>
+        <Tab>Queued</Tab>
+        <Tab>Running</Tab>
+        <Tab>Success</Tab>
+        <Tab>Failed</Tab>
+      </TabList>
+
+      <TabPanels>
+        <TabPanel p={0}>
+          <JobsTable status="queued" />
+        </TabPanel>
+        <TabPanel p={0}>
+          <JobsTable status="running" />
+        </TabPanel>
+        <TabPanel p={0}>
+          <JobsTable status="success" />
+        </TabPanel>
+        <TabPanel p={0}>
+          <JobsTable status="failed" />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  );
+};
+
 type Job = {
   job_id: number;
   continuation: null;
-  status: "Success" | string;
+  status: string;
   created_at: number;
   last_run: number | null;
   next_run: number | null;
@@ -46,32 +84,6 @@ type Job = {
   };
   updated_at: number;
 };
-
-const Jobs: React.FC = () => (
-  <Tabs isLazy defaultIndex={2} variant="soft-rounded">
-    <TabList p={2}>
-      <Tab>Queued</Tab>
-      <Tab>Running</Tab>
-      <Tab>Success</Tab>
-      <Tab>Failed</Tab>
-    </TabList>
-
-    <TabPanels>
-      <TabPanel p={0}>
-        <JobsTable status="queued" />
-      </TabPanel>
-      <TabPanel p={0}>
-        <JobsTable status="running" />
-      </TabPanel>
-      <TabPanel p={0}>
-        <JobsTable status="success" />
-      </TabPanel>
-      <TabPanel p={0}>
-        <JobsTable status="failed" />
-      </TabPanel>
-    </TabPanels>
-  </Tabs>
-);
 
 const JobsTable: React.FC<{
   status: "queued" | "running" | "success" | "failed";
@@ -222,7 +234,7 @@ const ReRuneButton: React.FC<{ job: Job }> = ({ job }) => {
   const { post } = useFetch();
 
   const { mutate, isLoading } = useMutation(
-    () => post(`/jobs/${job.job_id}/re_run`, null),
+    () => post(`/jobs/re-run`, { jobId: job.job_id }),
     {
       onSuccess: () => {
         client.refetchQueries(["jobs"]);

@@ -7,7 +7,6 @@ import { credentialValidAtom } from "./atoms";
 import Nav from "./components/Nav";
 
 const Jobs = lazy(() => import("./pages/Jobs"));
-const Notifications = lazy(() => import("./pages/Notifications"));
 const SignIn = lazy(() => import("./pages/SignIn"));
 const Streams = lazy(() => import("./pages/Streams"));
 const Subscriptions = lazy(() => import("./pages/Subscriptions"));
@@ -25,12 +24,23 @@ const App: React.FC = () => {
       <Box mt="60px">
         <Switch>
           <Suspense fallback={<div>loading...</div>}>
-            <Route path="/jobs" component={Jobs} />
-            <Route path="/streams" component={Streams} />
-            <Route path="/notifications" component={Notifications} />
-            <Route path="/subscriptions" component={Subscriptions} />
-            <Route path="/catalog" component={Catalog} />
-            <Route path="/" children={<Redirect to="/jobs" />} />
+            <Route path="/jobs/:tab?">{(params) => <Jobs {...params} />}</Route>
+
+            <Route path="/streams/:tab?">
+              {(params) => <Streams {...params} />}
+            </Route>
+
+            <Route path="/subscriptions/:tab?">
+              {(params) => <Subscriptions {...params} />}
+            </Route>
+
+            <Route path="/catalog/:tab?">
+              {(params) => <Catalog {...params} />}
+            </Route>
+
+            <Route path="/">
+              <Redirect to="/jobs" />
+            </Route>
           </Suspense>
         </Switch>
       </Box>

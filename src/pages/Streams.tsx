@@ -21,6 +21,7 @@ import { useInfiniteQuery } from "react-query";
 import FormatDate from "../components/FormatDate";
 import LoadMore from "../components/LoadMore";
 import { useFetch } from "../utils/fetch";
+import { useLocation } from "wouter";
 
 type Stream = {
   platformId: string;
@@ -36,27 +37,38 @@ type Stream = {
   status: "SCHEDULED" | "LIVE" | "ENDED";
 };
 
-const Streams: React.FC = () => (
-  <Tabs isLazy defaultIndex={2} variant="soft-rounded">
-    <TabList p={2}>
-      <Tab>Scheduled</Tab>
-      <Tab>Live</Tab>
-      <Tab>Ended</Tab>
-    </TabList>
+const tabs = ["scheduled", "live", "ended"];
 
-    <TabPanels>
-      <TabPanel p={0}>
-        <StreamsTable status="scheduled" />
-      </TabPanel>
-      <TabPanel p={0}>
-        <StreamsTable status="live" />
-      </TabPanel>
-      <TabPanel p={0}>
-        <StreamsTable status="ended" />
-      </TabPanel>
-    </TabPanels>
-  </Tabs>
-);
+const Streams: React.FC<{ tab?: string }> = ({ tab = "ended" }) => {
+  const [_, setLocation] = useLocation();
+
+  return (
+    <Tabs
+      isLazy
+      index={tabs.indexOf(tab)}
+      onChange={(index) => setLocation(`/streams/${tabs[index]}`)}
+      variant="soft-rounded"
+    >
+      <TabList p={2}>
+        <Tab>Scheduled</Tab>
+        <Tab>Live</Tab>
+        <Tab>Ended</Tab>
+      </TabList>
+
+      <TabPanels>
+        <TabPanel p={0}>
+          <StreamsTable status="scheduled" />
+        </TabPanel>
+        <TabPanel p={0}>
+          <StreamsTable status="live" />
+        </TabPanel>
+        <TabPanel p={0}>
+          <StreamsTable status="ended" />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  );
+};
 
 const StreamsTable: React.FC<{
   status: "scheduled" | "live" | "ended";

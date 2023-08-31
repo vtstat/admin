@@ -1,14 +1,23 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import React from "react";
+import { useLocation } from "wouter";
+
 import VTubers from "./VTubers";
 import Channels from "./Channels";
 import Groups from "./Groups";
 
-type Props = {};
+const tabs = ["groups", "vtubers", "channels"];
 
-const Catalog: React.FC<Props> = ({}) => {
+const Catalog: React.FC<{ tab?: string }> = ({ tab = "vtubers" }) => {
+  const [_, setLocation] = useLocation();
+
   return (
-    <Tabs isLazy defaultIndex={2} variant="soft-rounded">
+    <Tabs
+      isLazy
+      index={tabs.indexOf(tab)}
+      onChange={(index) => setLocation(`/catalog/${tabs[index]}`)}
+      variant="soft-rounded"
+    >
       <TabList p={2}>
         <Tab>Groups</Tab>
         <Tab>VTubers</Tab>
