@@ -33,7 +33,7 @@ type Stream = {
   startTime: number;
   endTime: number;
   updatedAt: number;
-  status: "scheduled" | "live" | "ended";
+  status: "SCHEDULED" | "LIVE" | "ENDED";
 };
 
 const Streams: React.FC = () => (
@@ -158,15 +158,15 @@ const StreamsTable: React.FC<{
 
 const StreamStatus: React.FC<{ stream: Stream }> = ({ stream }) => {
   switch (stream.status) {
-    case "scheduled": {
+    case "SCHEDULED": {
       return <Tag>Scheduled</Tag>;
     }
 
-    case "live": {
+    case "LIVE": {
       return <Tag colorScheme="red">Live</Tag>;
     }
 
-    case "ended": {
+    case "ENDED": {
       return <Tag colorScheme="green">Ended</Tag>;
     }
 

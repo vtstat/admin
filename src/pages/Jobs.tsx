@@ -185,12 +185,16 @@ const JobsPayload: React.FC<{ payload: Job["payload"] }> = ({ payload }) => {
 
 const JobsStatus: React.FC<{ job: Job }> = ({ job }) => {
   switch (job.status) {
-    case "Success": {
+    case "SUCCESS": {
       return <Tag colorScheme="green">Success</Tag>;
     }
 
-    case "Failed": {
+    case "FAILED": {
       return <Tag colorScheme="red">Failed</Tag>;
+    }
+
+    case "QUEUED": {
+      return <Tag colorScheme="gray">Queued</Tag>;
     }
 
     default:
