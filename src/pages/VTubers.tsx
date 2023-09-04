@@ -20,14 +20,18 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
+import { lightFormat } from "date-fns";
 import { atom, useAtom, useSetAtom } from "jotai";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useQuery } from "react-query";
 
+import DateInput from "../components/DateInput";
 import FormInput from "../components/FormInput";
 import { client } from "../main";
 import { useFetch } from "../utils/fetch";
+
+const offset = new Date().getTimezoneOffset() * 60 * 1000;
 
 const editVTuberModalStateAtom = atom<{
   open: boolean;
@@ -56,9 +60,12 @@ const Add: React.FC = () => (
 
 const VTubers: React.FC = ({}) => {
   const { get } = useFetch();
-  const { data: vtubers = [] } = useQuery(["vtubers"], () =>
-    get<VTuber[]>("/vtubers")
-  );
+  const { data: vtubers = [] } = useQuery({
+    queryKey: ["vtubers"],
+    queryFn: () => get<VTuber[]>("/vtubers"),
+    select: (vtubers) =>
+      vtubers.sort((a, b) => a.vtuberId.localeCompare(b.vtuberId)),
+  });
 
   const setModalState = useSetAtom(editVTuberModalStateAtom);
   const setRenameVTuberId = useSetAtom(renameVTuberIdStateAtom);
@@ -105,8 +112,14 @@ const VTubers: React.FC = ({}) => {
                   @{vtuber.twitterUsername}
                 </Link>
               </Td>
-              <Td>{vtuber.debutedAt}</Td>
-              <Td>{vtuber.retiredAt}</Td>
+              <Td>
+                {vtuber.debutedAt &&
+                  lightFormat(vtuber.debutedAt - offset, "yyyy-MM-dd")}
+              </Td>
+              <Td>
+                {vtuber.retiredAt &&
+                  lightFormat(vtuber.retiredAt - offset, "yyyy-MM-dd")}
+              </Td>
               <Td>
                 <Button
                   colorScheme="teal"
@@ -241,6 +254,7 @@ const EditVTuberModal: React.FC = () => {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { isSubmitting },
   } = useForm<FormValues>({ values: vtuber });
 
@@ -280,6 +294,12 @@ const EditVTuberModal: React.FC = () => {
                   placeholder: "must be unique, e.g. shirakami-fubuki",
                   spellCheck: false,
                   isReadOnly: mode === "Edit",
+                  onBlur: (e) => {
+                    setValue(
+                      "vtuberId",
+                      e.target.value.split(" ").join("-").toLowerCase()
+                    );
+                  },
                 }}
               />
 
@@ -325,6 +345,12 @@ const EditVTuberModal: React.FC = () => {
                 inputProps={{
                   placeholder: "e.g. shirakamifubuki",
                   spellCheck: false,
+                  onBlur: (e) => {
+                    setValue(
+                      "twitterUsername",
+                      e.target.value?.split("/").pop()
+                    );
+                  },
                 }}
               />
 
@@ -338,9 +364,26 @@ const EditVTuberModal: React.FC = () => {
                   inputProps={{
                     placeholder: "e.g. UCoSrY_IQQVpmIRZ9Xf-y93g",
                     spellCheck: false,
+                    onBlur: (e) => {
+                      setValue(
+                        "youtubeChannelId",
+                        e.target.value?.split("/").pop()
+                      );
+                    },
                   }}
                 />
               )}
+
+              <FormInput<FormValues>
+                control={control}
+                name="retiredAt"
+                label="Retired at"
+                Input={DateInput}
+                inputProps={{
+                  placeholder: "e.g. 2022-01-04",
+                  spellCheck: false,
+                }}
+              />
             </Stack>
           </ModalBody>
 
