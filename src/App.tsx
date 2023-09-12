@@ -41,6 +41,10 @@ const App: React.FC = () => {
             <Route path="/">
               <Redirect to="/jobs" />
             </Route>
+
+            <Route path="/vtubers">
+              <Redirect to="/catalog/vtubers" />
+            </Route>
           </Suspense>
         </Switch>
       </Box>
