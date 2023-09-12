@@ -114,7 +114,14 @@ const StreamsTable: React.FC<{
             <Fragment key={index}>
               {streams.map((stream) => (
                 <Tr key={stream.streamId}>
-                  <Td isNumeric>{stream.streamId}</Td>
+                  <Td isNumeric>
+                    <Link
+                      target="_blank"
+                      href={"https://vt.poi.cat/stream/" + stream.streamId}
+                    >
+                      {stream.streamId}
+                    </Link>
+                  </Td>
                   <Td width="160px">
                     {stream.thumbnailUrl && (
                       <Img
