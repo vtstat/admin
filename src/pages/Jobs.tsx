@@ -1,5 +1,6 @@
 import {
   Button,
+  Link,
   Popover,
   PopoverArrow,
   PopoverBody,
@@ -113,8 +114,9 @@ const JobsTable: React.FC<{
           <Tr>
             <Th isNumeric>ID</Th>
             <Th>Status</Th>
-            <Th>Last Run</Th>
-            <Th>Next Run</Th>
+            {(status === "failed" || status === "success") && <Th>Last Run</Th>}
+            {status === "queued" && <Th>Next Run</Th>}
+            {status === "running" && <Th>Start at</Th>}
             <Th>Kind</Th>
             <Th>Payload</Th>
             <Th>Created</Th>
@@ -131,20 +133,24 @@ const JobsTable: React.FC<{
                   <Td>
                     <JobsStatus job={job} />
                   </Td>
-                  <Td>
-                    {job.last_run ? (
-                      <FormatDate>{job.last_run}</FormatDate>
-                    ) : (
-                      "N/A"
-                    )}
-                  </Td>
-                  <Td>
-                    {job.next_run ? (
-                      <FormatDate>{job.next_run}</FormatDate>
-                    ) : (
-                      "N/A"
-                    )}
-                  </Td>
+                  {(status === "failed" || status === "success") && (
+                    <Td>
+                      {job.last_run ? (
+                        <FormatDate>{job.last_run}</FormatDate>
+                      ) : (
+                        "N/A"
+                      )}
+                    </Td>
+                  )}
+                  {(status === "queued" || status === "running") && (
+                    <Td>
+                      {job.next_run ? (
+                        <FormatDate>{job.next_run}</FormatDate>
+                      ) : (
+                        "N/A"
+                      )}
+                    </Td>
+                  )}
                   <Td>
                     <JobKind kind={job.kind} />
                   </Td>
@@ -186,11 +192,24 @@ const JobsPayload: React.FC<{ payload: Job["payload"] }> = ({ payload }) => {
 
   return (
     <Stack direction="row" spacing={4}>
-      {entries.map(([key, value]) => (
-        <Tag variant="outline" key={key}>
-          {key}: {value}
-        </Tag>
-      ))}
+      {entries.map(([key, value]) => {
+        if (key === "stream_id") {
+          return (
+            <Tag variant="outline" key={key}>
+              {key}:{"  "}
+              <Link target="_blank" href={`https://vt.poi.cat/stream/${value}`}>
+                {value}
+              </Link>
+            </Tag>
+          );
+        }
+
+        return (
+          <Tag variant="outline" key={key}>
+            {key}: {value}
+          </Tag>
+        );
+      })}
     </Stack>
   );
 };
@@ -205,6 +224,10 @@ const JobsStatus: React.FC<{ job: Job }> = ({ job }) => {
       return <Tag colorScheme="red">Failed</Tag>;
     }
 
+    case "RUNNING": {
+      return <Tag colorScheme="blue">Running</Tag>;
+    }
+
     case "QUEUED": {
       return <Tag colorScheme="gray">Queued</Tag>;
     }
@@ -216,12 +239,24 @@ const JobsStatus: React.FC<{ job: Job }> = ({ job }) => {
 
 const JobKind: React.FC<{ kind: string }> = ({ kind }) => {
   switch (kind) {
-    case "SendNotification": {
-      return <Tag colorScheme="telegram">Send Notification</Tag>;
+    case "SEND_NOTIFICATION": {
+      return <Tag colorScheme="telegram">SendNotification</Tag>;
     }
 
-    case "UpsertYoutubeStream": {
-      return <Tag colorScheme="orange">Upsert YouTube Stream</Tag>;
+    case "COLLECT_YOUTUBE_STREAM_METADATA": {
+      return <Tag colorScheme="red">CollectYouTubeStreamStats</Tag>;
+    }
+
+    case "COLLECT_TWITCH_STREAM_METADATA": {
+      return <Tag colorScheme="purple">CollectTwitchStreamStats</Tag>;
+    }
+
+    case "SUBSCRIBE_YOUTUBE_PUBSUB": {
+      return <Tag colorScheme="facebook">SubscriberYouTubePubSub</Tag>;
+    }
+
+    case "UPDATE_CHANNEL_STATS": {
+      return <Tag colorScheme="linkedin">CollectChannelStats</Tag>;
     }
 
     default: {
