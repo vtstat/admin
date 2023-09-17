@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Link,
   Popover,
@@ -25,7 +26,11 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import React, { Fragment } from "react";
-import { useInfiniteQuery, useMutation } from "react-query";
+import {
+  UseInfiniteQueryResult,
+  useInfiniteQuery,
+  useMutation,
+} from "react-query";
 import { useLocation } from "wouter";
 
 import FormatDate from "../components/FormatDate";
@@ -37,6 +42,19 @@ const tabs = ["queued", "running", "success", "failed"];
 
 const Jobs: React.FC<{ tab?: string }> = ({ tab = "success" }) => {
   const [_, setLocation] = useLocation();
+  const { get } = useFetch();
+  const result = useInfiniteQuery(
+    ["jobs", tab],
+    ({ pageParam }) =>
+      get<Job[]>({
+        url: "/jobs",
+        query: { end_at: pageParam, status: tab },
+      }),
+    {
+      getNextPageParam: (lastJobs) => lastJobs[23]?.updated_at,
+      staleTime: 1000,
+    }
+  );
 
   return (
     <Tabs
@@ -50,20 +68,42 @@ const Jobs: React.FC<{ tab?: string }> = ({ tab = "success" }) => {
         <Tab>Running</Tab>
         <Tab>Success</Tab>
         <Tab>Failed</Tab>
+
+        <Stack
+          w="full"
+          align="center"
+          justify="end"
+          direction="row"
+          spacing={4}
+          px="4"
+        >
+          <Box>
+            Total:{" "}
+            {result.data?.pages.reduce((acc, page) => acc + page.length, 0)}
+            {result.hasNextPage && "+"}
+          </Box>
+          <Button
+            colorScheme="teal"
+            variant="link"
+            onClick={() => result.refetch()}
+          >
+            Refresh
+          </Button>
+        </Stack>
       </TabList>
 
       <TabPanels>
         <TabPanel p={0}>
-          <JobsTable status="queued" />
+          <JobsTable result={result} status="queued" />
         </TabPanel>
         <TabPanel p={0}>
-          <JobsTable status="running" />
+          <JobsTable result={result} status="running" />
         </TabPanel>
         <TabPanel p={0}>
-          <JobsTable status="success" />
+          <JobsTable result={result} status="success" />
         </TabPanel>
         <TabPanel p={0}>
-          <JobsTable status="failed" />
+          <JobsTable result={result} status="failed" />
         </TabPanel>
       </TabPanels>
     </Tabs>
@@ -87,25 +127,10 @@ type Job = {
 };
 
 const JobsTable: React.FC<{
+  result: UseInfiniteQueryResult<Job[]>;
   status: "queued" | "running" | "success" | "failed";
-}> = ({ status }) => {
-  const { get } = useFetch();
-  const {
-    data: jobs,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery(
-    ["jobs", status],
-    ({ pageParam }) =>
-      get<Job[]>({
-        url: "/jobs",
-        query: { end_at: pageParam, status },
-      }),
-    {
-      getNextPageParam: (lastJobs) => lastJobs[23]?.updated_at,
-    }
-  );
+}> = ({ status, result }) => {
+  const { data: jobs, fetchNextPage, hasNextPage, isFetchingNextPage } = result;
 
   return (
     <TableContainer overflowX="unset" overflowY="unset">
