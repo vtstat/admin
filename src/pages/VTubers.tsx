@@ -260,9 +260,9 @@ const EditVTuberModal: React.FC = () => {
 
   const onSubmit = async (values: FormValues) => {
     if (mode === "Add") {
-      await put("/vtuber", values);
+      await put("/vtubers", values);
     } else {
-      await post("/vtuber", values);
+      await post("/vtubers", values);
     }
     setModalState({ open: false, mode: "Add" });
     client.refetchQueries(["vtubers"]);
